@@ -2,7 +2,9 @@
 
 A portfolio-quality bilingual website and lead-processing automation for a realistic boutique travel agency.
 
-The project is built in small, reviewable milestones. The **Milestone 1A Ukrainian home-page shell is currently ready for owner design review**. It does not yet include the English version, language switching, lead form, email delivery, n8n workflow, Google Sheets, Telegram notifications, or AI qualification.
+**Live website:** [krisdziam.github.io/travel-lead-automation](https://krisdziam.github.io/travel-lead-automation/)
+
+The project is built in small, reviewable milestones. The **Milestone 1A Ukrainian home-page shell is approved**, and the **Milestone 1B English version and language switcher are ready for owner review**. The site does not yet include the lead form, email delivery, n8n workflow, Google Sheets, Telegram notifications, or AI qualification.
 
 ## Product direction
 
@@ -77,8 +79,10 @@ npm run build
 ├── src/
 │   └── app/
 │       ├── globals.css   Brand tokens and responsive page styles
-│       ├── layout.tsx    Root layout, metadata, and local font setup
-│       └── page.tsx      Ukrainian home-page shell
+│       ├── home-page.tsx Bilingual interactive home page
+│       ├── layout.tsx    Locale-aware root layout and metadata
+│       ├── locale.ts     Supported locale and cookie helpers
+│       └── page.tsx      Server entry point and saved-locale lookup
 ├── .env.example          Safe environment-variable placeholders
 ├── DESIGN_BRIEF.md       Approved MVP brand and design direction
 ├── PROJECT_BRIEF.md      Product source of truth
@@ -94,10 +98,18 @@ npm run build
 
 Milestone 0 established the workspace and recorded the core decisions. Milestone 1 is intentionally split into reviewable parts:
 
-- Milestone 1A: Ukrainian responsive home-page shell — implemented, awaiting owner design review;
-- later Milestone 1 work: English copy and language switching — not started;
+- Milestone 1A: Ukrainian responsive home-page shell — approved and committed;
+- Milestone 1B: English copy and accessible language switching — implemented, awaiting owner review;
 - Milestone 2: production-quality lead form — represented only by a clearly labeled placeholder;
 - later milestones: secure email delivery and the n8n automation chain.
+
+## Language preference
+
+Ukrainian is the default for a new visitor. Choosing `UA` or `EN` updates the page immediately without navigation or reload and stores only the selected locale in the first-party `mandra_locale` cookie for one year. On the next visit, the browser restores that choice after the static page loads. The document language and localized metadata follow the selection.
+
+## Deployment
+
+The public site is exported as static HTML, CSS, and JavaScript and deployed to GitHub Pages by [`.github/workflows/deploy-pages.yml`](./.github/workflows/deploy-pages.yml). Every push to `main` runs a clean build and publishes the generated `out/` directory. GitHub Pages hosts only the current website shell; future form submission and automation will require a separate server endpoint.
 
 ## Documentation
 

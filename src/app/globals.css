@@ -50,19 +50,46 @@ button, a, summary { -webkit-tap-highlight-color: transparent; }
   background: color-mix(in srgb, var(--sand) 92%, transparent);
   backdrop-filter: blur(16px);
 }
-.header-inner { min-height: 4.75rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.header-inner { min-height: 4.75rem; display: flex; align-items: center; justify-content: space-between; gap: .65rem; }
 .wordmark {
   display: inline-flex; align-items: center; gap: .65rem; color: var(--forest);
-  font-family: var(--font-serif); font-size: 1.05rem; font-weight: 700;
+  font-family: var(--font-serif); font-size: .95rem; font-weight: 700;
   line-height: 1; text-decoration: none; white-space: nowrap;
 }
 .wordmark i { font-weight: 400; }
 .wordmark-mark {
-  width: 2rem; height: 2rem; display: grid; place-items: center;
+  width: 1.8rem; height: 1.8rem; display: grid; place-items: center;
   border: 1px solid currentColor; border-radius: 50% 50% 50% 0;
   font-size: .8rem; transform: rotate(-12deg);
 }
 .desktop-nav { display: none; }
+.header-actions { display: flex; align-items: center; gap: .45rem; }
+.language-switcher {
+  min-height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(23, 63, 53, .22);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, .6);
+  color: var(--stone);
+  padding-inline: .2rem;
+}
+.language-switcher button {
+  min-width: 2rem;
+  min-height: 2.65rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-size: .68rem;
+  font-weight: 700;
+  padding: 0;
+}
+.language-switcher button:hover { color: var(--forest); }
+.language-switcher button.is-active { color: var(--forest); text-decoration: underline; text-decoration-color: var(--terracotta); text-decoration-thickness: 2px; text-underline-offset: .28rem; }
+.language-switcher > span { color: rgba(23, 63, 53, .32); font-size: .7rem; }
 
 .button {
   min-height: 3.25rem; display: inline-flex; align-items: center; justify-content: center;
@@ -73,7 +100,14 @@ button, a, summary { -webkit-tap-highlight-color: transparent; }
 }
 .button:hover { background: var(--forest-light); transform: translateY(-2px); }
 .button svg { width: 1.15rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.6; }
-.button-small { min-height: 2.75rem; max-width: 9.5rem; padding: .65rem 1rem; font-size: .78rem; }
+.button-small { min-height: 2.75rem; max-width: 8.2rem; padding: .65rem .75rem; font-size: .72rem; }
+.button-small svg { display: none; }
+
+@media (max-width: 23rem) {
+  .button-small { width: 2.75rem; padding: .65rem; }
+  .button-small-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .button-small svg { display: block; }
+}
 
 .hero {
   overflow: hidden;
@@ -286,7 +320,7 @@ h1 em { color: var(--terracotta); font-weight: 400; }
 
 @media (min-width: 40rem) {
   .shell { width: min(100% - 3rem, 76rem); }
-  .button-small { max-width: none; font-size: .84rem; }
+  .button-small { max-width: none; font-size: .84rem; padding-inline: 1rem; }
   .hero-actions { flex-direction: row; align-items: center; }
   .journey-grid { grid-template-columns: repeat(2, 1fr); }
   .journey-card:last-child { grid-column: 1 / -1; }
@@ -296,6 +330,8 @@ h1 em { color: var(--terracotta); font-weight: 400; }
 
 @media (min-width: 56.25rem) {
   .header-inner { min-height: 5.5rem; }
+  .wordmark { font-size: 1.05rem; }
+  .wordmark-mark { width: 2rem; height: 2rem; }
   .desktop-nav { display: flex; align-items: center; gap: 1.7rem; }
   .desktop-nav a { color: var(--stone); font-size: .82rem; font-weight: 650; text-decoration: none; }
   .desktop-nav a:hover { color: var(--forest); }

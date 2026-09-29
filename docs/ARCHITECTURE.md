@@ -10,16 +10,17 @@ This document records the main technical boundaries and data-flow decisions for 
 
 ## 2. Current state
 
-Milestone 0 contains only:
+The project currently contains:
 
-- a minimal Next.js application;
-- TypeScript in strict mode;
-- the App Router under `src/app`;
-- Tailwind CSS infrastructure;
-- linting, type-checking, and production-build scripts;
+- a responsive Ukrainian home-page shell approved in Milestone 1A;
+- complete Ukrainian and English interface copy for the implemented sections;
+- an accessible client-side language switcher;
+- a first-party locale cookie restored by the browser for language persistence;
+- a static export deployed automatically to GitHub Pages;
+- TypeScript in strict mode, linting, type-checking, and production-build scripts;
 - documentation and a safe environment-variable template.
 
-The production home page, bilingual routing, lead form, API endpoint, email delivery, Gmail, n8n, Google Sheets, Telegram, and AI processing are not implemented yet.
+The lead form, API endpoint, email delivery, Gmail, n8n, Google Sheets, Telegram notifications, and AI processing are not implemented yet.
 
 ## 3. Decisions
 
@@ -71,6 +72,18 @@ The production home page, bilingual routing, lead form, API endpoint, email deli
 
 **Why:** A spreadsheet is sufficient for the learning-focused MVP and is easy for the owner to inspect.
 
+### ADR-009 — Lightweight cookie-based localization
+
+**Decision:** Keep Ukrainian as the default locale and store an explicit `uk` or `en` choice in the first-party `mandra_locale` cookie. React restores that choice after the static page loads and changes the visible copy, metadata, and document language without navigation or reload.
+
+**Why:** The MVP needs one bilingual page, not localized URL routing. This approach preserves the visitor’s scroll position and future form state while remaining compatible with static GitHub Pages hosting.
+
+### ADR-010 — GitHub Pages for the public website shell
+
+**Decision:** Export the current Next.js site as static files and deploy them from GitHub Actions to the project path `/travel-lead-automation/` on GitHub Pages.
+
+**Why:** This provides a stable public review link without introducing paid hosting. GitHub Pages cannot run the future form API, so server-side lead processing remains a later deployment decision.
+
 ## 4. Planned data flow
 
 1. A visitor completes the Ukrainian or English form.
@@ -99,19 +112,18 @@ The production home page, bilingual routing, lead form, API endpoint, email deli
 
 ```text
 src/
-  app/          Routes, layouts, pages, and future server endpoints
+  app/          Routes, layout, bilingual page copy, and future server endpoints
   components/   Reusable interface components added in Milestone 1+
   lib/          Shared validation, transformations, and integrations
-  messages/     Ukrainian and English copy when localization is implemented
 ```
 
-Only `src/app` is created in Milestone 0. Other folders should be added when they first contain real code; empty architecture is avoided.
+Only folders containing real code are created; empty architecture is avoided. The small Milestone 1 translation dictionary remains beside the page component and can move to `messages/` if later routes make that separation useful.
 
 ## 7. Deferred decisions
 
 The following are intentionally unresolved and must not be treated as completed:
 
-- exact bilingual URL strategy and localization library — Milestone 1;
+- localized URL routing and a localization library — deferred unless future routes make them useful;
 - form schema, budget ranges, consent copy, and privacy text — Milestone 2;
 - email provider and production addresses — Milestone 3;
 - n8n hosting and Gmail filter details — Milestone 4;
