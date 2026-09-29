@@ -2,7 +2,7 @@
 
 A portfolio-quality bilingual website and lead-processing automation for a realistic boutique travel agency.
 
-The project is built in small, reviewable milestones. The current repository contains the **Milestone 0 foundation only**. It does not yet include the final home page, lead form, email delivery, n8n workflow, Google Sheets, Telegram notifications, or AI qualification.
+The project is built in small, reviewable milestones. The **Milestone 1A Ukrainian home-page shell is currently ready for owner design review**. It does not yet include the English version, language switching, lead form, email delivery, n8n workflow, Google Sheets, Telegram notifications, or AI qualification.
 
 ## Product direction
 
@@ -72,12 +72,13 @@ npm run build
 .
 ├── docs/
 │   └── ARCHITECTURE.md   Technical decisions and planned data flow
-├── public/               Static assets added when they are needed
+├── public/
+│   └── images/           Local editorial imagery for the website
 ├── src/
 │   └── app/
-│       ├── globals.css   Minimal global styles and Tailwind import
-│       ├── layout.tsx    Root HTML layout and metadata
-│       └── page.tsx      Temporary Milestone 0 verification page
+│       ├── globals.css   Brand tokens and responsive page styles
+│       ├── layout.tsx    Root layout, metadata, and local font setup
+│       └── page.tsx      Ukrainian home-page shell
 ├── .env.example          Safe environment-variable placeholders
 ├── DESIGN_BRIEF.md       Approved MVP brand and design direction
 ├── PROJECT_BRIEF.md      Product source of truth
@@ -91,10 +92,11 @@ npm run build
 
 ## Current scope
 
-Milestone 0 establishes the workspace and records decisions. Product implementation begins only after owner review:
+Milestone 0 established the workspace and recorded the core decisions. Milestone 1 is intentionally split into reviewable parts:
 
-- Milestone 1: bilingual responsive website shell;
-- Milestone 2: production-quality lead form;
+- Milestone 1A: Ukrainian responsive home-page shell — implemented, awaiting owner design review;
+- later Milestone 1 work: English copy and language switching — not started;
+- Milestone 2: production-quality lead form — represented only by a clearly labeled placeholder;
 - later milestones: secure email delivery and the n8n automation chain.
 
 ## Documentation
