@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+  font-family: Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #fff;
+  color: #202522;
+}
+
+main {
+  width: min(100% - 2rem, 48rem);
+  margin-inline: auto;
+  padding-block: 4rem;
+}
+
+h1 {
+  max-width: 20ch;
+  font-size: clamp(2rem, 8vw, 4rem);
+  line-height: 1.05;
+}
+
+p {
+  max-width: 60ch;
+  line-height: 1.6;
+}
