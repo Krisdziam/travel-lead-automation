@@ -10,11 +10,11 @@
 
 ## Milestone 1 — Bilingual website shell
 
-- [ ] Build the main responsive page.
-- [ ] Add Ukrainian and English copy.
-- [ ] Add language switching.
-- [ ] Add navigation and visible request CTA.
-- [ ] Verify mobile and desktop layouts.
+- [x] Build the main responsive page.
+- [x] Add Ukrainian and English copy.
+- [x] Add language switching.
+- [x] Add navigation and visible request CTA.
+- [x] Verify mobile and desktop layouts.
 
 ## Milestone 2 — Production-quality lead form
 
