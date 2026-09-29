@@ -9,6 +9,7 @@ import {
   readStoredLocale,
   type Locale,
 } from "./locale";
+import LeadForm from "./lead-form";
 
 const LOCALE_CHANGE_EVENT = "mandra-locale-change";
 const imageBasePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
@@ -156,11 +157,8 @@ const translations = {
       eyebrow: "Почнімо з вашої ідеї",
       title: "Розкажіть про майбутню подорож",
       description:
-        "Тут з’явиться коротка форма заявки. Ви зможете вказати побажання, орієнтовні дати та зручний спосіб зв’язку.",
+        "Поділіться основними побажаннями, орієнтовними датами та зручним способом зв’язку. На цьому етапі форма працює локально й ще не надсилає дані.",
       assurance: "Точний напрямок і дати не будуть обов’язковими.",
-      placeholderLabel: "Місце майбутньої форми заявки",
-      placeholder: "Форма заявки з’явиться на наступному етапі",
-      milestone: "Milestone 2",
     },
     faq: {
       eyebrow: "Коротко про важливе",
@@ -347,11 +345,8 @@ const translations = {
       eyebrow: "Let’s start with your idea",
       title: "Tell us about your next journey",
       description:
-        "A short request form will appear here. You’ll be able to share your wishes, approximate dates, and preferred way to stay in touch.",
+        "Share your main wishes, approximate dates, and preferred way to stay in touch. At this stage, the form works locally and does not send any data yet.",
       assurance: "An exact destination and dates will not be required.",
-      placeholderLabel: "Placeholder for the future trip request form",
-      placeholder: "The request form will arrive in the next milestone",
-      milestone: "Milestone 2",
     },
     faq: {
       eyebrow: "A few important answers",
@@ -564,7 +559,7 @@ export default function HomePage() {
         <section className="section request-section" id="request" aria-labelledby="request-title">
           <div className="shell request-grid">
             <div><p className="eyebrow">{copy.request.eyebrow}</p><h2 id="request-title">{copy.request.title}</h2><p className="request-copy">{copy.request.description}</p><p className="request-assurance"><span aria-hidden="true">✓</span>{copy.request.assurance}</p></div>
-            <div className="form-placeholder" aria-label={copy.request.placeholderLabel}><div className="placeholder-route" aria-hidden="true"><span /><i /><span /></div><p>{copy.request.placeholder}</p><span>{copy.request.milestone}</span></div>
+            <LeadForm locale={locale} />
           </div>
         </section>
 
