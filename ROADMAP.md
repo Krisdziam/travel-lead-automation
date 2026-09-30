@@ -32,7 +32,7 @@
 - [x] Use the standard Next.js runtime locally and on Vercel.
 - [x] Keep the legacy GitHub Pages static export isolated to its GitHub Actions build.
 - [x] Document the approved non-commercial Vercel Hobby architecture.
-- [ ] Connect the GitHub repository to Vercel and verify the first deployment.
+- [x] Connect the GitHub repository to Vercel and verify the first deployment.
 - [ ] Retire GitHub Pages only after the Vercel deployment is approved.
 
 ### Milestone 3B — Server endpoint and email delivery

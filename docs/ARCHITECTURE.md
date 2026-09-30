@@ -1,6 +1,6 @@
 # Mandra Travel — Architecture
 
-> **Status:** Milestone 3A architecture accepted; first Vercel deployment pending
+> **Status:** Milestone 3A Vercel deployment verified; GitHub Pages retirement pending owner approval
 >
 > **Last updated:** 30 September 2026
 
@@ -19,7 +19,7 @@ The project currently contains:
 - a bilingual lead form with accessible client-side validation and automated tests;
 - an explicit form-submission state model and a future submission-function contract;
 - a local development-only submission demo that performs no network requests;
-- a standard Next.js runtime configuration prepared for Vercel;
+- a verified Vercel deployment using the standard Next.js runtime;
 - a temporary legacy static deployment still available on GitHub Pages during migration;
 - TypeScript in strict mode, linting, type-checking, and production-build scripts;
 - documentation and a safe environment-variable template.
