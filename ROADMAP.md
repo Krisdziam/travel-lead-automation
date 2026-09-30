@@ -33,7 +33,7 @@
 - [x] Keep the legacy GitHub Pages static export isolated to its GitHub Actions build.
 - [x] Document the approved non-commercial Vercel Hobby architecture.
 - [x] Connect the GitHub repository to Vercel and verify the first deployment.
-- [ ] Retire GitHub Pages only after the Vercel deployment is approved.
+- [x] Keep GitHub Pages available temporarily without blocking the Vercel migration.
 
 ### Milestone 3B — Server endpoint and email delivery
 
@@ -72,6 +72,7 @@
 
 ## Milestone 7 — Hardening and launch
 
+- [ ] Retire the legacy GitHub Pages deployment after explicit owner approval.
 - [ ] Add rate limiting or equivalent spam protection.
 - [ ] Check security, privacy, and secret handling.
 - [ ] Test email/API/AI failure scenarios.
