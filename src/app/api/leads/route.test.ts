@@ -67,7 +67,7 @@ describe("POST /api/leads", () => {
 
   it("rejects unsupported content and oversized requests", async () => {
     const unsupported = await POST(request(JSON.stringify(validBody()), "text/plain"));
-    const oversized = await POST(new Request("http://localhost/api/leads", {
+    const oversizedByHeader = await POST(new Request("http://localhost/api/leads", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -75,9 +75,11 @@ describe("POST /api/leads", () => {
       },
       body: "{}",
     }));
+    const oversizedByBody = await POST(request("x".repeat(MAX_LEAD_REQUEST_BYTES + 1)));
 
     assert.equal(unsupported.status, 415);
-    assert.equal(oversized.status, 413);
+    assert.equal(oversizedByHeader.status, 413);
+    assert.equal(oversizedByBody.status, 413);
   });
 
   it("returns an indistinguishable success for a filled honeypot", async () => {
@@ -85,5 +87,19 @@ describe("POST /api/leads", () => {
     const body = await response.json() as Record<string, unknown>;
     assert.equal(response.status, 201);
     assert.equal(body.ok, true);
+  });
+
+  it("returns a generic 500 response when request processing throws unexpectedly", async () => {
+    const brokenRequest = request("{}");
+    Object.defineProperty(brokenRequest, "text", {
+      value: async () => { throw new Error("simulated read failure"); },
+    });
+
+    const response = await POST(brokenRequest);
+    assert.equal(response.status, 500);
+    assert.deepEqual(await response.json(), {
+      ok: false,
+      error: { code: "technical_error" },
+    });
   });
 });

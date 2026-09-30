@@ -33,11 +33,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Exclude server-only routes from legacy static build
-        run: mv src/app/api "$RUNNER_TEMP/mandra-server-routes"
-
       - name: Build static website
-        run: npm run build
+        shell: bash
+        run: |
+          server_routes="$RUNNER_TEMP/mandra-server-routes"
+
+          restore_server_routes() {
+            if [ -d "$server_routes" ]; then
+              mv "$server_routes" src/app/api
+            fi
+          }
+
+          trap restore_server_routes EXIT INT TERM
+          mv src/app/api "$server_routes"
+          npm run build
 
       - name: Upload website artifact
         uses: actions/upload-pages-artifact@v5
