@@ -4,7 +4,7 @@ A portfolio-quality bilingual website and lead-processing automation for a reali
 
 **Live website:** [krisdziam.github.io/travel-lead-automation](https://krisdziam.github.io/travel-lead-automation/)
 
-The project is built in small, reviewable milestones. **Milestone 1 and Milestone 2A are approved and complete:** the responsive bilingual website now includes the lead-form structure. Client-side validation for Milestone 2B is under owner review. The form does not send data yet, and the site does not include email delivery, an n8n workflow, Google Sheets, Telegram notifications, or AI qualification.
+The project is built in small, reviewable milestones. **Milestones 1 and 2 are approved and complete:** the responsive bilingual website includes a production-quality lead-form interface with accessible validation and submission states. The form does not send data yet, and the site does not include email delivery, an n8n workflow, Google Sheets, Telegram notifications, or AI qualification.
 
 ## Product direction
 
@@ -82,8 +82,9 @@ npm run build
 │       ├── globals.css   Brand tokens and responsive page styles
 │       ├── home-page.tsx Bilingual interactive home page
 │       ├── lead-form.tsx Bilingual lead-form interface
+│       ├── lead-form-submission.ts      Submission contract and state transitions
 │       ├── lead-form-validation.ts      Client-side validation rules
-│       ├── lead-form-validation.test.ts Automated validation tests
+│       ├── lead-form-*.test.ts          Automated validation and state tests
 │       ├── layout.tsx    Static root layout, metadata, and font setup
 │       ├── locale.ts     Supported locale and cookie helpers
 │       └── page.tsx      Static home-page entry point
@@ -100,12 +101,13 @@ npm run build
 
 ## Current scope
 
-Milestone 0 established the workspace and recorded the core decisions. Milestone 1 was delivered in two reviewable parts:
+Milestone 0 established the workspace and recorded the core decisions. Milestones 1 and 2 were delivered in small, reviewable parts:
 
 - Milestone 1A: Ukrainian responsive home-page shell — approved and committed;
 - Milestone 1B: English copy and accessible language switching — approved and committed;
 - Milestone 2A: bilingual lead-form structure and basic behavior — approved and committed;
-- Milestone 2B: client-side validation, accessible errors, and anti-spam honeypot — implemented locally and awaiting owner review;
+- Milestone 2B: client-side validation, accessible errors, and anti-spam honeypot — approved and committed;
+- Milestone 2C: submission states and a development-only local demo — approved;
 - later milestones: secure email delivery and the n8n automation chain.
 
 ## Language preference

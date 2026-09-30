@@ -13,6 +13,9 @@
   },
   "include": [
     "src/app/lead-form-validation.ts",
-    "src/app/lead-form-validation.test.ts"
+    "src/app/lead-form-validation.test.ts",
+    "src/app/lead-form-submission.ts",
+    "src/app/lead-form-submission.test.ts",
+    "src/app/lead-form-demo.ts"
   ]
 }

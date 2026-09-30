@@ -18,12 +18,12 @@
 
 ## Milestone 2 — Production-quality lead form
 
-- [ ] Implement all agreed fields.
-- [ ] Add dynamic validation by contact method.
-- [ ] Add consent and privacy copy.
-- [ ] Add loading, success, validation, and failure states.
-- [ ] Add a honeypot and input limits.
-- [ ] Test keyboard and screen-reader-friendly labels.
+- [x] Implement all agreed fields.
+- [x] Add dynamic validation by contact method.
+- [x] Add consent and privacy copy.
+- [x] Add loading, success, validation, and failure states.
+- [x] Add a honeypot and input limits.
+- [x] Test keyboard and screen-reader-friendly labels.
 
 ## Milestone 3 — Secure email delivery
 

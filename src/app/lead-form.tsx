@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState, type FormEvent } from "react";
 
 import {
   CONTACT_METHODS,
@@ -13,10 +13,20 @@ import {
   type ValidationErrors,
   type ValidationField,
 } from "./lead-form-validation";
+import {
+  createSubmissionExecutor,
+  formSubmissionReducer,
+  initialFormSubmissionState,
+  type DemoScenario,
+} from "./lead-form-submission";
 import type { Locale } from "./locale";
 
 type DestinationChoice = "chosen" | "help";
 type LeadFormProps = { locale: Locale };
+type DemoMode = "off" | DemoScenario;
+type SubmissionExecutor = ReturnType<typeof createSubmissionExecutor>;
+
+const SUBMISSION_DEMO_ENABLED = process.env.NODE_ENV === "development";
 
 const copy = {
   uk: {
@@ -100,6 +110,7 @@ const copy = {
       button: "Перевірити дані",
       note: "Зараз форма нічого не надсилає і не зберігає на сервері.",
       ready: "Усі поля заповнені коректно. Дані не надіслано — надсилання буде підключене на наступному етапі.",
+      validating: "Перевіряємо введені дані…",
     },
     validation: {
       summaryTitle: "Перевірте форму",
@@ -199,6 +210,7 @@ const copy = {
       button: "Check details",
       note: "The form does not send or store anything on a server yet.",
       ready: "All fields are valid. Nothing was sent — submission will be connected in the next stage.",
+      validating: "Checking the information you entered…",
     },
     validation: {
       summaryTitle: "Check the form",
@@ -234,6 +246,39 @@ const copy = {
     },
   },
 } as const;
+
+const demoCopy = process.env.NODE_ENV === "development" ? {
+  uk: {
+    submitting: "Демонстраційне надсилання… Жодного мережевого запиту не виконується.",
+    success: "Демонстраційну заявку створено локально. Тестовий номер заявки:",
+    error: "У демонстраційному режимі сталася технічна помилка. Усі введені дані збережено.",
+    retry: "Спробувати ще раз",
+    submit: "Запустити демонстраційне надсилання",
+    eyebrow: "Лише для локальної розробки",
+    title: "Демонстрація станів форми",
+    description: "Цей блок не виконує мережевих запитів і не з’явиться на production-сайті.",
+    scenario: "Сценарій",
+    off: "Звичайний режим — лише перевірка",
+    demoSuccess: "Демо — успішний результат",
+    errorOnce: "Демо — помилка, потім успіх",
+    currentState: "Поточний стан",
+  },
+  en: {
+    submitting: "Demonstration submission in progress… No network request is being made.",
+    success: "The demonstration request was created locally. Test request number:",
+    error: "A technical error occurred in demonstration mode. All entered information has been preserved.",
+    retry: "Try again",
+    submit: "Run demonstration submission",
+    eyebrow: "Local development only",
+    title: "Form state demonstration",
+    description: "This panel makes no network requests and will not appear on the production site.",
+    scenario: "Scenario",
+    off: "Normal mode — validation only",
+    demoSuccess: "Demo — successful result",
+    errorOnce: "Demo — error, then success",
+    currentState: "Current state",
+  },
+} as const : null;
 
 const initialContactValues: Record<ContactMethod, string> = {
   telegram: "",
@@ -306,6 +351,7 @@ function describedBy(...ids: Array<string | false | undefined>) {
 
 export default function LeadForm({ locale }: LeadFormProps) {
   const t = copy[locale];
+  const demoT = demoCopy?.[locale];
   const dateLimits = useMemo(() => getDateLimits(), []);
   const [destinationChoice, setDestinationChoice] = useState<DestinationChoice>("chosen");
   const [destination, setDestination] = useState("");
@@ -316,11 +362,20 @@ export default function LeadForm({ locale }: LeadFormProps) {
   const [communicationLanguage, setCommunicationLanguage] = useState<Locale>(locale);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [hasAttemptedValidation, setHasAttemptedValidation] = useState(false);
-  const [isReady, setIsReady] = useState(false);
+  const [submissionState, dispatchSubmission] = useReducer(
+    formSubmissionReducer,
+    initialFormSubmissionState,
+  );
+  const [demoMode, setDemoMode] = useState<DemoMode>("off");
   const formRef = useRef<HTMLFormElement>(null);
   const errorSummaryRef = useRef<HTMLDivElement>(null);
-  const validationStatusRef = useRef<HTMLParagraphElement>(null);
+  const submissionStatusRef = useRef<HTMLParagraphElement>(null);
   const communicationLanguageChanged = useRef(false);
+  const submissionGuardRef = useRef(false);
+  const demoExecutorRef = useRef<{
+    scenario: DemoScenario;
+    executor: SubmissionExecutor;
+  } | null>(null);
 
   useEffect(() => {
     if (!communicationLanguageChanged.current) setCommunicationLanguage(locale);
@@ -333,6 +388,27 @@ export default function LeadForm({ locale }: LeadFormProps) {
   const parsedChildren = /^\d+$/.test(children) ? Number(children) : 0;
   const visibleChildCount = parsedChildren >= 1 && parsedChildren <= 8 ? parsedChildren : 0;
   const errorEntries = Object.entries(errors) as Array<[ValidationField, ValidationErrorCode]>;
+  const isBusy = submissionState.status === "validating" || submissionState.status === "submitting";
+  const isDemoMode = Boolean(demoT) && demoMode !== "off";
+
+  const submissionMessage = (() => {
+    if (submissionState.status === "validating") return t.confirmation.validating;
+    if (submissionState.status === "submitting") return demoT?.submitting ?? "";
+    if (submissionState.status === "success") {
+      return demoT ? `${demoT.success} ${submissionState.leadId}.` : "";
+    }
+    if (submissionState.status === "error") return demoT?.error ?? "";
+    if (submissionState.notice === "validated") return t.confirmation.ready;
+    return "";
+  })();
+
+  const submitButtonLabel = (() => {
+    if (submissionState.status === "validating") return t.confirmation.validating;
+    if (submissionState.status === "submitting") return demoT?.submitting ?? t.confirmation.button;
+    if (submissionState.status === "error" && isDemoMode) return demoT?.retry ?? t.confirmation.button;
+    if (isDemoMode) return demoT?.submit ?? t.confirmation.button;
+    return t.confirmation.button;
+  })();
 
   function errorMessage(field: ValidationField) {
     const code = errors[field];
@@ -373,32 +449,84 @@ export default function LeadForm({ locale }: LeadFormProps) {
   }
 
   function handleFormChange() {
-    setIsReady(false);
+    dispatchSubmission({ type: "formChanged" });
     if (!hasAttemptedValidation) return;
     window.requestAnimationFrame(() => {
       if (formRef.current) setErrors(runValidation(formRef.current));
     });
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function getDemoExecutor(scenario: DemoScenario) {
+    if (demoExecutorRef.current?.scenario === scenario) return demoExecutorRef.current.executor;
+
+    if (process.env.NODE_ENV === "development") {
+      const { createDemoSubmitLead } = await import("./lead-form-demo");
+      const executor = createSubmissionExecutor(createDemoSubmitLead(scenario));
+      demoExecutorRef.current = { scenario, executor };
+      return executor;
+    }
+
+    throw new Error("The local submission demo is unavailable.");
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const nextErrors = runValidation(event.currentTarget);
+    if (submissionGuardRef.current || submissionState.status === "submitting") return;
+
+    submissionGuardRef.current = true;
+    const values = readFormValues(event.currentTarget);
+    dispatchSubmission({ type: "validationStarted" });
+
+    if (isDemoMode) {
+      await new Promise<void>((resolve) => window.setTimeout(resolve, 300));
+    } else {
+      await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
+    }
+
+    const nextErrors = validateLeadForm(values);
     const firstError = Object.keys(nextErrors)[0] as ValidationField | undefined;
     setHasAttemptedValidation(true);
     setErrors(nextErrors);
 
     if (firstError) {
-      setIsReady(false);
+      dispatchSubmission({ type: "validationFailed" });
+      submissionGuardRef.current = false;
       window.requestAnimationFrame(() => focusField(firstError));
       return;
     }
 
-    setIsReady(true);
-    window.requestAnimationFrame(() => validationStatusRef.current?.focus());
+    if (!isDemoMode) {
+      dispatchSubmission({ type: "validationPassed" });
+      submissionGuardRef.current = false;
+      window.requestAnimationFrame(() => submissionStatusRef.current?.focus());
+      return;
+    }
+
+    dispatchSubmission({ type: "submissionStarted" });
+    const executor = await getDemoExecutor(demoMode);
+    const attempt = await executor.submit(values);
+
+    if (attempt.kind === "completed") {
+      if (attempt.result.ok) {
+        dispatchSubmission({ type: "submissionSucceeded", leadId: attempt.result.leadId });
+      } else {
+        dispatchSubmission({ type: "submissionFailed", errorCode: attempt.result.error.code });
+      }
+    }
+
+    submissionGuardRef.current = false;
+    window.requestAnimationFrame(() => submissionStatusRef.current?.focus());
   }
 
   return (
-    <form className="lead-form" ref={formRef} noValidate onChange={handleFormChange} onSubmit={handleSubmit}>
+    <form
+      className="lead-form"
+      ref={formRef}
+      noValidate
+      data-submission-state={submissionState.status}
+      onChange={handleFormChange}
+      onSubmit={handleSubmit}
+    >
       {errorEntries.length > 0 && (
         <div className="error-summary" id="form-errors" ref={errorSummaryRef} role="alert" aria-live="assertive" tabIndex={-1}>
           <h3>{t.validation.summaryTitle}</h3>
@@ -421,6 +549,34 @@ export default function LeadForm({ locale }: LeadFormProps) {
         <label htmlFor="website">Website</label>
         <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" />
       </div>
+
+      {SUBMISSION_DEMO_ENABLED && demoT && (
+        <section className="submission-demo" data-local-submission-demo aria-labelledby="submission-demo-title">
+          <p className="submission-demo-eyebrow">{demoT.eyebrow}</p>
+          <h3 id="submission-demo-title">{demoT.title}</h3>
+          <p>{demoT.description}</p>
+          <div className="submission-demo-controls">
+            <label htmlFor="submission-demo-scenario">{demoT.scenario}</label>
+            <select
+              id="submission-demo-scenario"
+              value={demoMode}
+              disabled={isBusy}
+              onChange={(event) => {
+                const nextMode = event.target.value as DemoMode;
+                setDemoMode(nextMode);
+                demoExecutorRef.current = null;
+              }}
+            >
+              <option value="off">{demoT.off}</option>
+              <option value="success">{demoT.demoSuccess}</option>
+              <option value="errorOnce">{demoT.errorOnce}</option>
+            </select>
+          </div>
+          <p className="submission-demo-state">
+            {demoT.currentState}: <code>{submissionState.status}</code>
+          </p>
+        </section>
+      )}
 
       <fieldset className="form-section">
         <legend>{t.travel.legend}</legend>
@@ -566,9 +722,20 @@ export default function LeadForm({ locale }: LeadFormProps) {
           <span>{t.confirmation.consent}<small>{t.required}</small></span>
         </label>
         {errorMessage("consent") && <p className="field-error consent-error" id="consent-error">{errorMessage("consent")}</p>}
-        <button className="form-submit-preview" type="submit">{t.confirmation.button}</button>
+        <button className="form-submit-preview" type="submit" disabled={isBusy} aria-disabled={isBusy}>
+          {submitButtonLabel}
+        </button>
         <p className="submission-note">{t.confirmation.note}</p>
-        <p className={`submission-status${isReady ? " is-visible" : ""}`} ref={validationStatusRef} role="status" aria-live="polite" tabIndex={-1}>{isReady ? t.confirmation.ready : ""}</p>
+        <p
+          className={`submission-status${submissionMessage ? " is-visible" : ""}${submissionState.status === "error" ? " is-error" : ""}`}
+          ref={submissionStatusRef}
+          role={submissionState.status === "error" ? "alert" : "status"}
+          aria-live={submissionState.status === "error" ? "assertive" : "polite"}
+          aria-atomic="true"
+          tabIndex={-1}
+        >
+          {submissionMessage}
+        </p>
       </fieldset>
     </form>
   );

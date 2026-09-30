@@ -1,8 +1,8 @@
 # Mandra Travel — Architecture
 
-> **Status:** accepted for the MVP foundation
+> **Status:** accepted through Milestone 2
 >
-> **Last updated:** 29 September 2026
+> **Last updated:** 30 September 2026
 
 ## 1. Purpose
 
@@ -16,11 +16,14 @@ The project currently contains:
 - complete Ukrainian and English interface copy for the implemented sections;
 - an accessible client-side language switcher;
 - a first-party locale cookie restored by the browser for language persistence;
+- a bilingual lead form with accessible client-side validation and automated tests;
+- an explicit form-submission state model and a future submission-function contract;
+- a local development-only submission demo that performs no network requests;
 - a static export deployed automatically to GitHub Pages;
 - TypeScript in strict mode, linting, type-checking, and production-build scripts;
 - documentation and a safe environment-variable template.
 
-The lead form, API endpoint, email delivery, Gmail, n8n, Google Sheets, Telegram notifications, and AI processing are not implemented yet.
+The production submission adapter, API endpoint, email delivery, Gmail, n8n, Google Sheets, Telegram notifications, and AI processing are not implemented yet.
 
 ## 3. Decisions
 
@@ -84,6 +87,12 @@ The lead form, API endpoint, email delivery, Gmail, n8n, Google Sheets, Telegram
 
 **Why:** This provides a stable public review link without introducing paid hosting. GitHub Pages cannot run the future form API, so server-side lead processing remains a later deployment decision.
 
+### ADR-011 — Submission contract separated from the form interface
+
+**Decision:** Model the form lifecycle as `idle`, `validating`, `submitting`, `success`, and `error`. A typed `SubmitLead` function accepts validated form values and returns either a `leadId` or a controlled error. The current public form never calls a submission adapter. A no-network demonstration adapter is available only in development and automated tests.
+
+**Why:** Milestone 3 can replace the demonstration adapter with a real server call without changing field handling, validation, accessible status messages, retry behavior, or duplicate-submission protection.
+
 ## 4. Planned data flow
 
 1. A visitor completes the Ukrainian or English form.
@@ -101,9 +110,9 @@ The lead form, API endpoint, email delivery, Gmail, n8n, Google Sheets, Telegram
 
 - Secrets exist only in local or hosting environment variables, never in browser code or Git.
 - `.env.example` contains placeholders only.
-- User input will be length-limited, validated, sanitized, and safely rendered.
+- Browser input is length-limited and validated; the future server must validate and sanitize it again.
 - The server is the authoritative validation boundary.
-- A honeypot and rate limiting are required before public launch.
+- A hidden honeypot is implemented; server-side rate limiting remains required before public launch.
 - Logs use `leadId` and workflow state without unnecessary personal data.
 - Gmail/n8n processing will deduplicate by `leadId`.
 - Automated customer replies remain disabled until a later explicit decision.
@@ -124,7 +133,7 @@ Only folders containing real code are created; empty architecture is avoided. Th
 The following are intentionally unresolved and must not be treated as completed:
 
 - localized URL routing and a localization library — deferred unless future routes make them useful;
-- form schema, budget ranges, consent copy, and privacy text — Milestone 2;
+- final privacy-policy destination and production consent wording — before public launch;
 - email provider and production addresses — Milestone 3;
 - n8n hosting and Gmail filter details — Milestone 4;
 - LLM provider and model — Milestone 5;
