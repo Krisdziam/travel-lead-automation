@@ -16,6 +16,13 @@
     "src/app/lead-form-validation.test.ts",
     "src/app/lead-form-submission.ts",
     "src/app/lead-form-submission.test.ts",
-    "src/app/lead-form-demo.ts"
+    "src/app/lead-form-demo.ts",
+    "src/app/locale.ts",
+    "src/app/lead-form-api.ts",
+    "src/app/lead-form-api.test.ts",
+    "src/app/lead-submission-server.ts",
+    "src/app/lead-submission-server.test.ts",
+    "src/app/api/leads/route.ts",
+    "src/app/api/leads/route.test.ts"
   ]
 }

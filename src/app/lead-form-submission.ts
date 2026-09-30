@@ -2,7 +2,7 @@ import type { LeadFormValues } from "./lead-form-validation";
 
 export type FormStatus = "idle" | "validating" | "submitting" | "success" | "error";
 export type DemoScenario = "success" | "errorOnce";
-export type SubmissionErrorCode = "technical_error";
+export type SubmissionErrorCode = "validation_error" | "technical_error";
 
 export type SubmitLeadResult =
   | { ok: true; leadId: string }

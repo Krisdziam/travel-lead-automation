@@ -13,6 +13,7 @@ import {
   type ValidationErrors,
   type ValidationField,
 } from "./lead-form-validation";
+import { createApiSubmitLead } from "./lead-form-api";
 import {
   createSubmissionExecutor,
   formSubmissionReducer,
@@ -27,6 +28,7 @@ type DemoMode = "off" | DemoScenario;
 type SubmissionExecutor = ReturnType<typeof createSubmissionExecutor>;
 
 const SUBMISSION_DEMO_ENABLED = process.env.NODE_ENV === "development";
+const SERVER_SUBMISSION_ENABLED = !process.env.NEXT_PUBLIC_BASE_PATH;
 
 const copy = {
   uk: {
@@ -107,10 +109,15 @@ const copy = {
       legend: "Підтвердження",
       description: "Ми використаємо надану інформацію лише для підготовки персональної пропозиції та зв’язку з вами.",
       consent: "Погоджуюся на обробку наданої інформації для підготовки пропозиції та зв’язку зі мною.",
-      button: "Перевірити дані",
-      note: "Зараз форма нічого не надсилає і не зберігає на сервері.",
-      ready: "Усі поля заповнені коректно. Дані не надіслано — надсилання буде підключене на наступному етапі.",
+      button: "Надіслати тестову заявку",
+      note: "Демонстраційний проєкт: використовуйте лише вигадані дані. Сервер перевірить заявку, але ще не надсилатиме email.",
+      ready: "Усі поля заповнені коректно. Ця legacy-копія не надсилає дані — використайте основний сайт на Vercel.",
       validating: "Перевіряємо введені дані…",
+      submitting: "Безпечно передаємо тестову заявку на сервер…",
+      success: "Тестову заявку прийнято сервером. Номер заявки:",
+      technicalError: "Сервер не зміг прийняти заявку. Введені дані збережено — спробуйте ще раз.",
+      validationError: "Сервер відхилив дані після повторної перевірки. Перевірте форму та спробуйте ще раз.",
+      retry: "Спробувати ще раз",
     },
     validation: {
       summaryTitle: "Перевірте форму",
@@ -207,10 +214,15 @@ const copy = {
       legend: "Confirmation",
       description: "We’ll use the information you provide only to prepare a personal proposal and contact you.",
       consent: "I agree to the processing of the information provided to prepare a proposal and contact me.",
-      button: "Check details",
-      note: "The form does not send or store anything on a server yet.",
-      ready: "All fields are valid. Nothing was sent — submission will be connected in the next stage.",
+      button: "Send test request",
+      note: "Demonstration project: use fictional data only. The server will validate the request but will not send email yet.",
+      ready: "All fields are valid. This legacy copy cannot submit data — use the primary Vercel website.",
       validating: "Checking the information you entered…",
+      submitting: "Securely sending the test request to the server…",
+      success: "The server accepted the test request. Request number:",
+      technicalError: "The server could not accept the request. Your entries are preserved — try again.",
+      validationError: "The server rejected the data after checking it again. Review the form and try again.",
+      retry: "Try again",
     },
     validation: {
       summaryTitle: "Check the form",
@@ -256,9 +268,9 @@ const demoCopy = process.env.NODE_ENV === "development" ? {
     submit: "Запустити демонстраційне надсилання",
     eyebrow: "Лише для локальної розробки",
     title: "Демонстрація станів форми",
-    description: "Цей блок не виконує мережевих запитів і не з’явиться на production-сайті.",
+    description: "Демо-сценарії не виконують мережевих запитів. Звичайний режим перевіряє реальний Route Handler.",
     scenario: "Сценарій",
-    off: "Звичайний режим — лише перевірка",
+    off: "Звичайний режим — Route Handler",
     demoSuccess: "Демо — успішний результат",
     errorOnce: "Демо — помилка, потім успіх",
     currentState: "Поточний стан",
@@ -271,9 +283,9 @@ const demoCopy = process.env.NODE_ENV === "development" ? {
     submit: "Run demonstration submission",
     eyebrow: "Local development only",
     title: "Form state demonstration",
-    description: "This panel makes no network requests and will not appear on the production site.",
+    description: "Demo scenarios make no network requests. Normal mode exercises the real Route Handler.",
     scenario: "Scenario",
-    off: "Normal mode — validation only",
+    off: "Normal mode — Route Handler",
     demoSuccess: "Demo — successful result",
     errorOnce: "Demo — error, then success",
     currentState: "Current state",
@@ -393,19 +405,31 @@ export default function LeadForm({ locale }: LeadFormProps) {
 
   const submissionMessage = (() => {
     if (submissionState.status === "validating") return t.confirmation.validating;
-    if (submissionState.status === "submitting") return demoT?.submitting ?? "";
-    if (submissionState.status === "success") {
-      return demoT ? `${demoT.success} ${submissionState.leadId}.` : "";
+    if (submissionState.status === "submitting") {
+      return isDemoMode ? demoT?.submitting ?? "" : t.confirmation.submitting;
     }
-    if (submissionState.status === "error") return demoT?.error ?? "";
+    if (submissionState.status === "success") {
+      const success = isDemoMode ? demoT?.success : t.confirmation.success;
+      return `${success} ${submissionState.leadId}.`;
+    }
+    if (submissionState.status === "error") {
+      if (isDemoMode) return demoT?.error ?? "";
+      return submissionState.errorCode === "validation_error"
+        ? t.confirmation.validationError
+        : t.confirmation.technicalError;
+    }
     if (submissionState.notice === "validated") return t.confirmation.ready;
     return "";
   })();
 
   const submitButtonLabel = (() => {
     if (submissionState.status === "validating") return t.confirmation.validating;
-    if (submissionState.status === "submitting") return demoT?.submitting ?? t.confirmation.button;
-    if (submissionState.status === "error" && isDemoMode) return demoT?.retry ?? t.confirmation.button;
+    if (submissionState.status === "submitting") {
+      return isDemoMode ? demoT?.submitting ?? t.confirmation.submitting : t.confirmation.submitting;
+    }
+    if (submissionState.status === "error") {
+      return isDemoMode ? demoT?.retry ?? t.confirmation.retry : t.confirmation.retry;
+    }
     if (isDemoMode) return demoT?.submit ?? t.confirmation.button;
     return t.confirmation.button;
   })();
@@ -495,7 +519,7 @@ export default function LeadForm({ locale }: LeadFormProps) {
       return;
     }
 
-    if (!isDemoMode) {
+    if (!SERVER_SUBMISSION_ENABLED && !isDemoMode) {
       dispatchSubmission({ type: "validationPassed" });
       submissionGuardRef.current = false;
       window.requestAnimationFrame(() => submissionStatusRef.current?.focus());
@@ -503,7 +527,9 @@ export default function LeadForm({ locale }: LeadFormProps) {
     }
 
     dispatchSubmission({ type: "submissionStarted" });
-    const executor = await getDemoExecutor(demoMode);
+    const executor = isDemoMode
+      ? await getDemoExecutor(demoMode)
+      : createSubmissionExecutor(createApiSubmitLead(locale));
     const attempt = await executor.submit(values);
 
     if (attempt.kind === "completed") {

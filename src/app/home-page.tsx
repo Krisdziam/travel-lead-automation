@@ -157,7 +157,7 @@ const translations = {
       eyebrow: "Почнімо з вашої ідеї",
       title: "Розкажіть про майбутню подорож",
       description:
-        "Поділіться основними побажаннями, орієнтовними датами та зручним способом зв’язку. На цьому етапі форма працює локально й ще не надсилає дані.",
+        "Поділіться основними побажаннями, орієнтовними датами та зручним способом зв’язку. На Vercel тестова заявка перевіряється сервером, але поки нікуди не надсилається.",
       assurance: "Точний напрямок і дати не будуть обов’язковими.",
     },
     faq: {
@@ -345,7 +345,7 @@ const translations = {
       eyebrow: "Let’s start with your idea",
       title: "Tell us about your next journey",
       description:
-        "Share your main wishes, approximate dates, and preferred way to stay in touch. At this stage, the form works locally and does not send any data yet.",
+        "Share your main wishes, approximate dates, and preferred way to stay in touch. On Vercel, the server validates the test request but does not send it anywhere yet.",
       assurance: "An exact destination and dates will not be required.",
     },
     faq: {
