@@ -1,6 +1,6 @@
 # Mandra Travel — Architecture
 
-> **Status:** Milestone 3A Vercel deployment verified; GitHub Pages retirement pending owner approval
+> **Status:** Milestone 3B Route Handler implemented for review; no external delivery connected
 >
 > **Last updated:** 30 September 2026
 
@@ -20,11 +20,13 @@ The project currently contains:
 - an explicit form-submission state model and a future submission-function contract;
 - a local development-only submission demo that performs no network requests;
 - a verified Vercel deployment using the standard Next.js runtime;
+- a same-origin `POST /api/leads` Route Handler with bounded JSON parsing, normalization, authoritative validation, metadata creation, and automated contract tests;
+- a production submission adapter that returns the generated `leadId` to the bilingual form;
 - a temporary legacy static deployment still available on GitHub Pages during migration;
 - TypeScript in strict mode, linting, type-checking, and production-build scripts;
 - documentation and a safe environment-variable template.
 
-The production submission adapter, API endpoint, email delivery, Gmail, n8n, Google Sheets, Telegram notifications, and AI processing are not implemented yet.
+Email delivery, Gmail, n8n, Google Sheets, Telegram notifications, and AI processing are not implemented yet. Accepted Milestone 3B requests are deliberately not stored or sent anywhere.
 
 ## 3. Decisions
 
@@ -100,6 +102,14 @@ The production submission adapter, API endpoint, email delivery, Gmail, n8n, Goo
 
 **Why:** The website is an interface for demonstrating the future n8n workflow, not a commercial service. Vercel keeps the page and future server endpoint in one project, removes cross-origin configuration from the submission path, and avoids a separate backend deployment. The standard runtime is required because a static export cannot process a dynamic `POST` request.
 
+### ADR-013 — Bounded same-origin lead contract before email delivery
+
+**Decision:** Implement `POST /api/leads` as a same-origin Next.js Route Handler before connecting Resend. Accept only JSON up to 16 KiB, normalize known text fields, repeat the complete form validation on the server, generate `lead_<UUID>`, an ISO timestamp, interface locale, and fixed website source metadata, then return only the identifier and timestamp. Keep provider delivery as a separate Milestone 3C concern.
+
+**Why:** This creates a small testable security boundary without credentials or external side effects. Same-origin submission needs no permissive CORS policy. Separating input processing from email delivery makes both failure paths easier to understand and test.
+
+**Legacy deployment consequence:** Static export supports only static `GET` handlers, not a request-dependent `POST`. The GitHub Pages workflow therefore moves `src/app/api` out of the build tree only inside its disposable runner. Its published form remains validation-only while the primary Vercel deployment uses the real endpoint.
+
 ## 4. Planned data flow
 
 1. A visitor completes the Ukrainian or English form.
@@ -117,8 +127,9 @@ The production submission adapter, API endpoint, email delivery, Gmail, n8n, Goo
 
 - Secrets exist only in local or hosting environment variables, never in browser code or Git.
 - `.env.example` contains placeholders only.
-- Browser input is length-limited and validated; the future server must validate and sanitize it again.
+- Browser input is length-limited and validated; the server parses unknown JSON, normalizes known text fields, and validates it again.
 - The server is the authoritative validation boundary.
+- Lead request bodies are limited to 16 KiB and successful responses use `Cache-Control: no-store`.
 - A hidden honeypot is implemented; server-side rate limiting remains required before public launch.
 - Logs use `leadId` and workflow state without unnecessary personal data.
 - Gmail/n8n processing will deduplicate by `leadId`.
@@ -128,7 +139,7 @@ The production submission adapter, API endpoint, email delivery, Gmail, n8n, Goo
 
 ```text
 src/
-  app/          Routes, layout, bilingual page copy, and future server endpoints
+  app/          Routes, layout, bilingual page copy, and the lead endpoint
   components/   Reusable interface components added in Milestone 1+
   lib/          Shared validation, transformations, and integrations
 ```
@@ -141,7 +152,7 @@ The following are intentionally unresolved and must not be treated as completed:
 
 - localized URL routing and a localization library — deferred unless future routes make them useful;
 - final privacy-policy destination and production consent wording — before public launch;
-- Resend account setup, test recipient address, and email delivery implementation — Milestone 3B;
+- Resend account setup, test recipient address, and email delivery implementation — Milestone 3C;
 - n8n hosting and Gmail filter details — Milestone 4;
 - LLM provider and model — Milestone 5;
 - real Google Sheet and Telegram credentials — Milestone 6;

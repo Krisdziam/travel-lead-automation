@@ -35,11 +35,17 @@
 - [x] Connect the GitHub repository to Vercel and verify the first deployment.
 - [x] Keep GitHub Pages available temporarily without blocking the Vercel migration.
 
-### Milestone 3B — Server endpoint and email delivery
+### Milestone 3B — Next.js Route Handler
 
-- [ ] Add a server endpoint.
-- [ ] Revalidate and sanitize input on the server.
-- [ ] Generate `leadId`, timestamp, locale, and source metadata.
+- [x] Add the same-origin `POST /api/leads` endpoint.
+- [x] Revalidate and normalize input on the server.
+- [x] Generate `leadId`, timestamp, locale, and source metadata.
+- [x] Connect the Vercel form to the endpoint without external delivery.
+- [x] Add safe HTTP errors, request-size limits, and automated contract tests.
+- [ ] Complete owner review of the Vercel Preview deployment.
+
+### Milestone 3C — Resend email delivery
+
 - [ ] Send human-readable email plus marked JSON payload to Gmail.
 - [ ] Add safe error handling and environment-variable setup.
 - [ ] Verify with test submissions.

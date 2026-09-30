@@ -4,7 +4,7 @@ A portfolio-quality bilingual website and lead-processing automation for a reali
 
 **Live website:** [travel-lead-automation.vercel.app](https://travel-lead-automation.vercel.app/)
 
-The project is built in small, reviewable milestones. **Milestones 1 and 2 are approved and complete:** the responsive bilingual website includes a production-quality lead-form interface with accessible validation and submission states. The form does not send data yet, and the site does not include email delivery, an n8n workflow, Google Sheets, Telegram notifications, or AI qualification.
+The project is built in small, reviewable milestones. **Milestones 1, 2, and 3A are approved and complete; Milestone 3B is in review:** the responsive bilingual website includes an accessible lead form and a same-origin server endpoint for fictional test data. The endpoint does not store or forward requests, and the site does not include email delivery, an n8n workflow, Google Sheets, Telegram notifications, or AI qualification.
 
 ## Product direction
 
@@ -82,9 +82,12 @@ npm run build
 │   └── app/
 │       ├── globals.css   Brand tokens and responsive page styles
 │       ├── home-page.tsx Bilingual interactive home page
+│       ├── api/leads/route.ts            Same-origin lead Route Handler
 │       ├── lead-form.tsx Bilingual lead-form interface
+│       ├── lead-form-api.ts              Browser-to-server submission adapter
 │       ├── lead-form-submission.ts      Submission contract and state transitions
 │       ├── lead-form-validation.ts      Client-side validation rules
+│       ├── lead-submission-server.ts    Server parsing, normalization, and metadata
 │       ├── lead-form-*.test.ts          Automated validation and state tests
 │       ├── layout.tsx    Static root layout, metadata, and font setup
 │       ├── locale.ts     Supported locale and cookie helpers
@@ -109,7 +112,9 @@ Milestone 0 established the workspace and recorded the core decisions. Milestone
 - Milestone 2A: bilingual lead-form structure and basic behavior — approved and committed;
 - Milestone 2B: client-side validation, accessible errors, and anti-spam honeypot — approved and committed;
 - Milestone 2C: submission states and a development-only local demo — approved;
-- later milestones: secure email delivery and the n8n automation chain.
+- Milestone 3A: Vercel hosting migration — approved and deployed;
+- Milestone 3B: same-origin Route Handler — implemented on a feature branch for review;
+- later milestones: Resend email delivery and the n8n automation chain.
 
 ## Language preference
 
@@ -117,9 +122,29 @@ Ukrainian is the default for a new visitor. Choosing `UA` or `EN` updates the pa
 
 ## Deployment
 
-The approved hosting architecture is Vercel Hobby for this non-commercial portfolio project. Local and Vercel builds now use the standard Next.js runtime, which prepares the project for a same-origin Route Handler in Milestone 3B. No server endpoint or external service is connected yet.
+The approved hosting architecture is Vercel Hobby for this non-commercial portfolio project. Local and Vercel builds use the standard Next.js runtime. The form now posts fictional test data to the same-origin `POST /api/leads` Route Handler. The endpoint validates and normalizes the request, creates metadata, and returns a confirmation; it does not store data or contact an external service.
 
 The Vercel deployment at [travel-lead-automation.vercel.app](https://travel-lead-automation.vercel.app/) is the primary public portfolio preview. The existing [GitHub Pages deployment](https://krisdziam.github.io/travel-lead-automation/) remains available temporarily as a legacy fallback. Its [deployment workflow](./.github/workflows/deploy-pages.yml) is intentionally still present and continues to request a static export only inside GitHub Actions. It will be retired only after owner approval; it should not be treated as the future server-capable deployment.
+
+The legacy workflow temporarily excludes `src/app/api` inside its disposable GitHub Actions runner because a dynamic `POST` handler cannot be included in a static export. The GitHub Pages form therefore remains validation-only and directs testing to Vercel.
+
+## Lead endpoint contract
+
+`POST /api/leads` accepts `application/json` with the current form fields plus the interface `locale`. Requests are limited to 16 KiB. On success it returns HTTP `201`:
+
+```json
+{
+  "ok": true,
+  "leadId": "lead_<uuid>",
+  "receivedAt": "2026-09-30T12:00:00.000Z"
+}
+```
+
+The server treats the browser validation as convenience only. It reads the unknown JSON shape safely, keeps known fields, normalizes text, repeats all business validation, and creates locale and source metadata. A filled honeypot receives an indistinguishable success response but is not accepted for later delivery.
+
+Expected error statuses are `400` for invalid JSON or shape, `413` for an oversized body, `415` for a non-JSON media type, `422` for field validation errors, and `500` for an unexpected server failure. Responses are not cached. No CORS headers are added because the production form and endpoint share the same Vercel origin.
+
+Milestone 3B intentionally contains no Resend package, email delivery, Gmail connection, n8n call, environment variable, or credential. Those remain Milestone 3C and later work.
 
 ## Documentation
 
