@@ -1,6 +1,6 @@
 # Mandra Travel — Architecture
 
-> **Status:** Milestone 3B Route Handler implemented for review; no external delivery connected
+> **Status:** Milestone 3B Route Handler verified in Vercel Production; no external delivery connected
 >
 > **Last updated:** 30 September 2026
 

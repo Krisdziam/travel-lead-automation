@@ -42,7 +42,7 @@
 - [x] Generate `leadId`, timestamp, locale, and source metadata.
 - [x] Connect the Vercel form to the endpoint without external delivery.
 - [x] Add safe HTTP errors, request-size limits, and automated contract tests.
-- [ ] Complete owner review of the Vercel Preview deployment.
+- [x] Complete owner review and Production verification of the Vercel deployment.
 
 ### Milestone 3C — Resend email delivery
 

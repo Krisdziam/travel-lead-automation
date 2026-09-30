@@ -4,7 +4,7 @@ A portfolio-quality bilingual website and lead-processing automation for a reali
 
 **Live website:** [travel-lead-automation.vercel.app](https://travel-lead-automation.vercel.app/)
 
-The project is built in small, reviewable milestones. **Milestones 1, 2, and 3A are approved and complete; Milestone 3B is in review:** the responsive bilingual website includes an accessible lead form and a same-origin server endpoint for fictional test data. The endpoint does not store or forward requests, and the site does not include email delivery, an n8n workflow, Google Sheets, Telegram notifications, or AI qualification.
+The project is built in small, reviewable milestones. **Milestones 1, 2, 3A, and 3B are approved and complete:** the responsive bilingual website includes an accessible lead form and a same-origin server endpoint for fictional test data. The endpoint does not store or forward requests, and the site does not include email delivery, an n8n workflow, Google Sheets, Telegram notifications, or AI qualification.
 
 ## Product direction
 
