@@ -2,7 +2,7 @@
 
 A portfolio-quality bilingual website and lead-processing automation for a realistic boutique travel agency.
 
-**Live website:** [krisdziam.github.io/travel-lead-automation](https://krisdziam.github.io/travel-lead-automation/)
+**Current public preview:** [krisdziam.github.io/travel-lead-automation](https://krisdziam.github.io/travel-lead-automation/) (legacy GitHub Pages deployment until the first Vercel deployment is verified)
 
 The project is built in small, reviewable milestones. **Milestones 1 and 2 are approved and complete:** the responsive bilingual website includes a production-quality lead-form interface with accessible validation and submission states. The form does not send data yet, and the site does not include email delivery, an n8n workflow, Google Sheets, Telegram notifications, or AI qualification.
 
@@ -16,6 +16,7 @@ Mandra Travel creates personalized trips with human support before, during, and 
 - React
 - TypeScript in strict mode
 - Tailwind CSS
+- Vercel Hobby for the approved non-commercial portfolio deployment
 - ESLint
 - npm
 
@@ -116,7 +117,9 @@ Ukrainian is the default for a new visitor. Choosing `UA` or `EN` updates the pa
 
 ## Deployment
 
-The current public version is exported as static HTML, CSS, and JavaScript and deployed at [krisdziam.github.io/travel-lead-automation](https://krisdziam.github.io/travel-lead-automation/) through GitHub Pages. The [deployment workflow](./.github/workflows/deploy-pages.yml) runs after every push to `main`, performs a clean build, and publishes the generated `out/` directory. GitHub Pages hosts only the current website shell; future form submission and automation will require a separate server endpoint.
+The approved hosting architecture is Vercel Hobby for this non-commercial portfolio project. Local and Vercel builds now use the standard Next.js runtime, which prepares the project for a same-origin Route Handler in Milestone 3B. No server endpoint or external service is connected yet.
+
+The existing [GitHub Pages deployment](https://krisdziam.github.io/travel-lead-automation/) remains available as a temporary legacy preview while the first Vercel deployment is created and verified. Its [deployment workflow](./.github/workflows/deploy-pages.yml) is intentionally still present and continues to request a static export only inside GitHub Actions. It will be retired only after owner approval; it should not be treated as the future server-capable deployment.
 
 ## Documentation
 

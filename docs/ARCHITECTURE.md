@@ -1,6 +1,6 @@
 # Mandra Travel — Architecture
 
-> **Status:** accepted through Milestone 2
+> **Status:** Milestone 3A architecture accepted; first Vercel deployment pending
 >
 > **Last updated:** 30 September 2026
 
@@ -19,7 +19,8 @@ The project currently contains:
 - a bilingual lead form with accessible client-side validation and automated tests;
 - an explicit form-submission state model and a future submission-function contract;
 - a local development-only submission demo that performs no network requests;
-- a static export deployed automatically to GitHub Pages;
+- a standard Next.js runtime configuration prepared for Vercel;
+- a temporary legacy static deployment still available on GitHub Pages during migration;
 - TypeScript in strict mode, linting, type-checking, and production-build scripts;
 - documentation and a safe environment-variable template.
 
@@ -81,7 +82,7 @@ The production submission adapter, API endpoint, email delivery, Gmail, n8n, Goo
 
 **Why:** The MVP needs one bilingual page, not localized URL routing. This approach preserves the visitor’s scroll position and future form state while remaining compatible with static GitHub Pages hosting.
 
-### ADR-010 — GitHub Pages for the public website shell
+### ADR-010 — GitHub Pages for the public website shell (superseded by ADR-012)
 
 **Decision:** Export the current Next.js site as static files and deploy them from GitHub Actions to the project path `/travel-lead-automation/` on GitHub Pages.
 
@@ -92,6 +93,12 @@ The production submission adapter, API endpoint, email delivery, Gmail, n8n, Goo
 **Decision:** Model the form lifecycle as `idle`, `validating`, `submitting`, `success`, and `error`. A typed `SubmitLead` function accepts validated form values and returns either a `leadId` or a controlled error. The current public form never calls a submission adapter. A no-network demonstration adapter is available only in development and automated tests.
 
 **Why:** Milestone 3 can replace the demonstration adapter with a real server call without changing field handling, validation, accessible status messages, retry behavior, or duplicate-submission protection.
+
+### ADR-012 — Vercel Hobby for the non-commercial portfolio deployment
+
+**Decision:** Deploy the complete Next.js application to Vercel Hobby and use the standard Next.js runtime for local and Vercel builds. Keep the project strictly demonstrational, accept only invented test data, and add the same-origin lead Route Handler in Milestone 3B. Keep the existing GitHub Pages workflow temporarily; only its GitHub Actions build requests a static export until the first Vercel deployment is verified.
+
+**Why:** The website is an interface for demonstrating the future n8n workflow, not a commercial service. Vercel keeps the page and future server endpoint in one project, removes cross-origin configuration from the submission path, and avoids a separate backend deployment. The standard runtime is required because a static export cannot process a dynamic `POST` request.
 
 ## 4. Planned data flow
 
@@ -134,9 +141,9 @@ The following are intentionally unresolved and must not be treated as completed:
 
 - localized URL routing and a localization library — deferred unless future routes make them useful;
 - final privacy-policy destination and production consent wording — before public launch;
-- email provider and production addresses — Milestone 3;
+- Resend account setup, test recipient address, and email delivery implementation — Milestone 3B;
 - n8n hosting and Gmail filter details — Milestone 4;
 - LLM provider and model — Milestone 5;
 - real Google Sheet and Telegram credentials — Milestone 6;
-- hosting, domain, rate limiting, and public launch settings — Milestone 7;
+- production domain, rate limiting, and public launch settings — Milestone 7;
 - domain, social account, and trademark checks for Mandra Travel — before public launch.
