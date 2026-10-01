@@ -4,7 +4,7 @@ A portfolio-quality bilingual website and lead-processing automation for a reali
 
 **Live website:** [travel-lead-automation.vercel.app](https://travel-lead-automation.vercel.app/)
 
-The project is built in small, reviewable milestones. **Milestones 1, 2, 3A, and 3B are approved and complete.** Milestone 3C email-delivery code is implemented locally and awaits owner-managed Resend/Vercel configuration and live verification. The site still does not include an n8n workflow, Google Sheets, Telegram notifications, or AI qualification.
+The project is built in small, reviewable milestones. **Milestones 1, 2, 3A, 3B, and 3C are approved and complete.** The bilingual form now validates fictional test requests on the server and sends accepted leads to the owner's Gmail inbox through Resend test mode. The site still does not include an n8n workflow, Google Sheets, Telegram notifications, or AI qualification.
 
 ## Product direction
 
@@ -117,7 +117,7 @@ Milestone 0 established the workspace and recorded the core decisions. Milestone
 - Milestone 2C: submission states and a development-only local demo — approved;
 - Milestone 3A: Vercel hosting migration — approved and deployed;
 - Milestone 3B: same-origin Route Handler — approved and verified in Production;
-- Milestone 3C: Resend test-mode delivery — code complete, awaiting external configuration and live verification;
+- Milestone 3C: Resend test-mode delivery — approved and verified end to end in Production with fictional data;
 - later milestones: the Gmail/n8n automation chain.
 
 ## Language preference
@@ -149,6 +149,8 @@ The server treats the browser validation as convenience only. It reads the unkno
 Expected error statuses are `400` for invalid JSON or shape, `413` for an oversized body, `415` for a non-JSON media type, `422` for field validation errors, `502` for a rejected provider request, `503` for missing server configuration, `504` for a delivery timeout, and `500` for an unexpected server failure. Provider failures expose only the generic `technical_error` code. Responses are not cached. No CORS headers are added because the production form and endpoint share the same Vercel origin.
 
 The Resend integration uses the server's standard `fetch`, an eight-second timeout, and an idempotency key derived from `leadId`. No API key or inbox address is committed. Gmail automation and n8n remain deferred to Milestone 4.
+
+Milestone 3C was verified in Vercel Production on 1 October 2026 with a completely fictional lead. The endpoint returned `201`, Resend reported `Delivered`, and the owner confirmed receipt in the dedicated Gmail inbox. The received subject, readable fields, `leadId`, and marked versioned JSON payload matched the accepted server data.
 
 ## Documentation
 

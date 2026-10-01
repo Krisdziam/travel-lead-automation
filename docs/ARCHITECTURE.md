@@ -1,6 +1,6 @@
 # Mandra Travel — Architecture
 
-> **Status:** Milestone 3C code implemented locally; owner-managed Resend/Vercel setup and live Gmail verification pending
+> **Status:** Milestone 3C Resend test-mode delivery verified end to end in Vercel Production and Gmail
 >
 > **Last updated:** 1 October 2026
 
@@ -27,7 +27,7 @@ The project currently contains:
 - TypeScript in strict mode, linting, type-checking, and production-build scripts;
 - documentation and a safe environment-variable template.
 
-Resend test-mode delivery is implemented but remains inactive until the owner supplies server-only environment variables. Gmail automation, n8n, Google Sheets, Telegram notifications, and AI processing are not implemented yet. Requests are not stored by the application.
+Resend test-mode delivery is active in Vercel Production and was verified with fictional data on 1 October 2026: the endpoint returned `201`, Resend reported `Delivered`, and the owner confirmed the marked JSON email in the dedicated Gmail inbox. Gmail automation, n8n, Google Sheets, Telegram notifications, and AI processing are not implemented yet. Requests are not stored by the application.
 
 ## 3. Decisions
 
@@ -161,7 +161,6 @@ The following are intentionally unresolved and must not be treated as completed:
 
 - localized URL routing and a localization library — deferred unless future routes make them useful;
 - final privacy-policy destination and production consent wording — before public launch;
-- owner-managed Resend account, Vercel secrets, and live test delivery verification — remaining Milestone 3C work;
 - n8n hosting and Gmail filter details — Milestone 4;
 - LLM provider and model — Milestone 5;
 - real Google Sheet and Telegram credentials — Milestone 6;
