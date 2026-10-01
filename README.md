@@ -4,7 +4,7 @@ A portfolio-quality bilingual website and lead-processing automation for a reali
 
 **Live website:** [travel-lead-automation.vercel.app](https://travel-lead-automation.vercel.app/)
 
-The project is built in small, reviewable milestones. **Milestones 1, 2, 3A, and 3B are approved and complete:** the responsive bilingual website includes an accessible lead form and a same-origin server endpoint for fictional test data. The endpoint does not store or forward requests, and the site does not include email delivery, an n8n workflow, Google Sheets, Telegram notifications, or AI qualification.
+The project is built in small, reviewable milestones. **Milestones 1, 2, 3A, and 3B are approved and complete.** Milestone 3C email-delivery code is implemented locally and awaits owner-managed Resend/Vercel configuration and live verification. The site still does not include an n8n workflow, Google Sheets, Telegram notifications, or AI qualification.
 
 ## Product direction
 
@@ -43,7 +43,7 @@ The foundation was initially verified with Node.js 26.8.2 and npm 11.19.1.
    cp .env.example .env.local
    ```
 
-   The current technical page does not call external services. Keep real secrets only in `.env.local`; never add them to Git.
+   Email delivery remains disabled until the server-only Resend values are supplied. Keep real secrets only in `.env.local`; never add them to Git.
 
 3. Start the development server:
 
@@ -87,6 +87,7 @@ npm run build
 │       ├── lead-form-api.ts              Browser-to-server submission adapter
 │       ├── lead-form-submission.ts      Submission contract and state transitions
 │       ├── lead-form-validation.ts      Client-side validation rules
+│       ├── lead-email.ts                Resend test-mode formatting and delivery
 │       ├── lead-submission-server.ts    Server parsing, normalization, and metadata
 │       ├── lead-form-*.test.ts          Automated validation and state tests
 │       ├── layout.tsx    Static root layout, metadata, and font setup
@@ -101,7 +102,9 @@ npm run build
 
 ## Environment variables
 
-`.env.example` documents names only and contains safe placeholders. Variables without the `NEXT_PUBLIC_` prefix must remain server-only. Never put provider keys or personal data in a `NEXT_PUBLIC_` variable.
+`.env.example` documents names only and contains safe placeholders. `RESEND_API_KEY` and `LEAD_INBOX_EMAIL` are server-only. Variables without the `NEXT_PUBLIC_` prefix must remain server-only. Never put provider keys or personal data in a `NEXT_PUBLIC_` variable.
+
+Milestone 3C uses Resend's restricted test mode: `Mandra Travel <onboarding@resend.dev>` may send only to the email address associated with the Resend account. No custom domain or paid Resend feature is required. Preview and Production values are configured separately in Vercel; the API key should be stored as a Sensitive Environment Variable.
 
 ## Current scope
 
@@ -113,8 +116,9 @@ Milestone 0 established the workspace and recorded the core decisions. Milestone
 - Milestone 2B: client-side validation, accessible errors, and anti-spam honeypot — approved and committed;
 - Milestone 2C: submission states and a development-only local demo — approved;
 - Milestone 3A: Vercel hosting migration — approved and deployed;
-- Milestone 3B: same-origin Route Handler — implemented on a feature branch for review;
-- later milestones: Resend email delivery and the n8n automation chain.
+- Milestone 3B: same-origin Route Handler — approved and verified in Production;
+- Milestone 3C: Resend test-mode delivery — code complete, awaiting external configuration and live verification;
+- later milestones: the Gmail/n8n automation chain.
 
 ## Language preference
 
@@ -122,7 +126,7 @@ Ukrainian is the default for a new visitor. Choosing `UA` or `EN` updates the pa
 
 ## Deployment
 
-The approved hosting architecture is Vercel Hobby for this non-commercial portfolio project. Local and Vercel builds use the standard Next.js runtime. The form now posts fictional test data to the same-origin `POST /api/leads` Route Handler. The endpoint validates and normalizes the request, creates metadata, and returns a confirmation; it does not store data or contact an external service.
+The approved hosting architecture is Vercel Hobby for this non-commercial portfolio project. Local and Vercel builds use the standard Next.js runtime. The form posts fictional test data to the same-origin `POST /api/leads` Route Handler. The endpoint validates and normalizes the request, creates metadata, and, when its server-only variables are configured, submits accepted leads to the owner's Gmail inbox through Resend test mode. It does not store requests.
 
 The Vercel deployment at [travel-lead-automation.vercel.app](https://travel-lead-automation.vercel.app/) is the primary public portfolio preview. The existing [GitHub Pages deployment](https://krisdziam.github.io/travel-lead-automation/) remains available temporarily as a legacy fallback. Its [deployment workflow](./.github/workflows/deploy-pages.yml) is intentionally still present and continues to request a static export only inside GitHub Actions. It will be retired only after owner approval; it should not be treated as the future server-capable deployment.
 
@@ -140,11 +144,11 @@ The legacy workflow temporarily excludes `src/app/api` inside its disposable Git
 }
 ```
 
-The server treats the browser validation as convenience only. It reads the unknown JSON shape safely, keeps known fields, normalizes text, repeats all business validation, and creates locale and source metadata. A filled honeypot receives an indistinguishable success response but is not accepted for later delivery.
+The server treats the browser validation as convenience only. It reads the unknown JSON shape safely, keeps known fields, normalizes text, repeats all business validation, and creates locale and source metadata. A filled honeypot receives an indistinguishable success response and never triggers email delivery. Malformed and invalid requests also never call Resend. Only an accepted request is formatted as a readable email with a versioned JSON payload between `---BEGIN_LEAD_JSON---` and `---END_LEAD_JSON---` markers.
 
-Expected error statuses are `400` for invalid JSON or shape, `413` for an oversized body, `415` for a non-JSON media type, `422` for field validation errors, and `500` for an unexpected server failure. Responses are not cached. No CORS headers are added because the production form and endpoint share the same Vercel origin.
+Expected error statuses are `400` for invalid JSON or shape, `413` for an oversized body, `415` for a non-JSON media type, `422` for field validation errors, `502` for a rejected provider request, `503` for missing server configuration, `504` for a delivery timeout, and `500` for an unexpected server failure. Provider failures expose only the generic `technical_error` code. Responses are not cached. No CORS headers are added because the production form and endpoint share the same Vercel origin.
 
-Milestone 3B intentionally contains no Resend package, email delivery, Gmail connection, n8n call, environment variable, or credential. Those remain Milestone 3C and later work.
+The Resend integration uses the server's standard `fetch`, an eight-second timeout, and an idempotency key derived from `leadId`. No API key or inbox address is committed. Gmail automation and n8n remain deferred to Milestone 4.
 
 ## Documentation
 

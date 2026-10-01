@@ -47,7 +47,7 @@
 ### Milestone 3C — Resend email delivery
 
 - [ ] Send human-readable email plus marked JSON payload to Gmail.
-- [ ] Add safe error handling and environment-variable setup.
+- [x] Add safe error handling and environment-variable setup.
 - [ ] Verify with test submissions.
 
 ## Milestone 4 — Gmail and n8n ingestion

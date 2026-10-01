@@ -1,8 +1,8 @@
 # Mandra Travel — Architecture
 
-> **Status:** Milestone 3B Route Handler verified in Vercel Production; no external delivery connected
+> **Status:** Milestone 3C code implemented locally; owner-managed Resend/Vercel setup and live Gmail verification pending
 >
-> **Last updated:** 30 September 2026
+> **Last updated:** 1 October 2026
 
 ## 1. Purpose
 
@@ -21,12 +21,13 @@ The project currently contains:
 - a local development-only submission demo that performs no network requests;
 - a verified Vercel deployment using the standard Next.js runtime;
 - a same-origin `POST /api/leads` Route Handler with bounded JSON parsing, normalization, authoritative validation, metadata creation, and automated contract tests;
+- a Resend test-mode formatter and delivery boundary with stable JSON markers, timeout handling, and idempotency;
 - a production submission adapter that returns the generated `leadId` to the bilingual form;
 - a temporary legacy static deployment still available on GitHub Pages during migration;
 - TypeScript in strict mode, linting, type-checking, and production-build scripts;
 - documentation and a safe environment-variable template.
 
-Email delivery, Gmail, n8n, Google Sheets, Telegram notifications, and AI processing are not implemented yet. Accepted Milestone 3B requests are deliberately not stored or sent anywhere.
+Resend test-mode delivery is implemented but remains inactive until the owner supplies server-only environment variables. Gmail automation, n8n, Google Sheets, Telegram notifications, and AI processing are not implemented yet. Requests are not stored by the application.
 
 ## 3. Decisions
 
@@ -110,6 +111,14 @@ Email delivery, Gmail, n8n, Google Sheets, Telegram notifications, and AI proces
 
 **Legacy deployment consequence:** Static export supports only static `GET` handlers, not a request-dependent `POST`. The GitHub Pages workflow therefore moves `src/app/api` out of the build tree only inside its disposable runner. Its published form remains validation-only while the primary Vercel deployment uses the real endpoint.
 
+### ADR-014 — Restricted Resend test mode without a custom domain
+
+**Decision:** For Milestone 3C, send accepted fictional leads from the fixed sender `Mandra Travel <onboarding@resend.dev>` only to the Gmail address associated with the Resend account. Read `RESEND_API_KEY` and `LEAD_INBOX_EMAIL` only on the server. Use the Resend `/emails` API through standard `fetch`, with an eight-second timeout and `travel-lead-email/<leadId>` as the idempotency key. Do not configure a custom domain, paid plan, pay-as-you-go, or add-ons.
+
+**Why:** Resend explicitly permits its test domain to send to the account owner's own email address. This keeps the portfolio workflow free and avoids unnecessary DNS setup while preserving the email handoff required for learning and the later n8n milestone.
+
+**Constraint:** This is not a general production sending setup. Changing the recipient to any other address requires a verified sending domain. The Free plan quota and test-domain restriction are intentional system limits.
+
 ## 4. Planned data flow
 
 1. A visitor completes the Ukrainian or English form.
@@ -152,7 +161,7 @@ The following are intentionally unresolved and must not be treated as completed:
 
 - localized URL routing and a localization library — deferred unless future routes make them useful;
 - final privacy-policy destination and production consent wording — before public launch;
-- Resend account setup, test recipient address, and email delivery implementation — Milestone 3C;
+- owner-managed Resend account, Vercel secrets, and live test delivery verification — remaining Milestone 3C work;
 - n8n hosting and Gmail filter details — Milestone 4;
 - LLM provider and model — Milestone 5;
 - real Google Sheet and Telegram credentials — Milestone 6;
